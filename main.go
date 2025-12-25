@@ -2,15 +2,13 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	
+
+	"github.com/jakhnormuradoff/final_project/pkg/server"
 )
 
 func main() {
-	fmt.Println("Запускаем сервер")
-	err := StartServer("web", "7540")
-	//http.Handle("/", http.FileServer(http.Dir(webDir)))
-	err = http.ListenAndServe(":7540", nil)
+
+	err := server.StartServer("web", "7540")
 	if err != nil {
 		panic(err)
 
