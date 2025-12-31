@@ -1,9 +1,10 @@
-package api
+	package api
 
-import (
-	"net/http"
-)
+	import (
+		"net/http"
+	)
 
-func Init() {
-	http.HandleFunc("/api/nextdate", NextDateHandler)
-}
+	func Init() {
+		http.HandleFunc("/api/nextdate", NextDateHandler)
+		http.HandleFunc("/api/task", taskHandler)
+	}
