@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 
@@ -8,14 +9,37 @@ import (
 )
 
 type Tasks struct {
-		Tasks []db.Task `json:"tasks"`
-	}
+	Tasks []db.Task `json:"tasks"`
+}
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	switch r.Method {
 	case "POST":
 		addTaskHandler(w, r)
+	case "GET":
+		id := r.URL.Query().Get("id")
+
+		if id == "" {
+			json.NewEncoder(w).Encode(map[string]string{"error": "ID is required"})
+			return
+		}
+		task, err := db.TaskByID(id)
+
+		if err == sql.ErrNoRows {
+			json.NewEncoder(w).Encode(map[string]string{"error": "Task not found"})
+			return
+		}
+
+		if err != nil {
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to get task"})
+			return
+		}
+
+		json.NewEncoder(w).Encode(task)
+
+	case "PUT":
+		updateTaskHandler(w, r)
 	default:
 		json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
 		return
@@ -31,11 +55,11 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to get tasks"})
 			return
 		}
-		if tasks == nil {	
-		tasks = []db.Task{}
-	}
+		if tasks == nil {
+			tasks = []db.Task{}
+		}
 		json.NewEncoder(w).Encode(Tasks{Tasks: tasks})
-	
+
 	default:
 		json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
 		return
