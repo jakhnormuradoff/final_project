@@ -40,6 +40,18 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 
 	case "PUT":
 		updateTaskHandler(w, r)
+	case "DELETE":
+		id := r.URL.Query().Get("id")
+		if id == "" {
+			json.NewEncoder(w).Encode(map[string]string{"error": "ID is required"})
+			return
+		}
+		err := db.DeleteTask(id)
+		if err != nil {
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to delete task"})
+			return
+		}
+		json.NewEncoder(w).Encode(map[string]string{})
 	default:
 		json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
 		return
