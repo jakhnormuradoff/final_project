@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -26,7 +25,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serverPassword := os.Getenv("TODO_PASSWORD")
+	serverPassword := appConfig.Password
 
 	if serverPassword == "" {
 		json.NewEncoder(w).Encode(map[string]string{"error": "Password is not set on server"})
@@ -43,7 +42,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := jwtToken.SignedString([]byte(os.Getenv("TODO_PASSWORD")))
+	signedToken, err := jwtToken.SignedString([]byte(appConfig.Password))
 
 	if err != nil {
 		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to generate token"})
@@ -53,7 +52,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "token",
 		Value:   signedToken,
-		Expires:  time.Now().Add(8 * time.Hour),
+		Expires: time.Now().Add(8 * time.Hour),
 	})
 
 	json.NewEncoder(w).Encode(map[string]string{"token": signedToken})

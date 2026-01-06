@@ -12,6 +12,11 @@ import (
 const formatted = "20060102"
 
 func NextDateHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	now := r.FormValue("now")
 	if now == "" {
 		now = time.Now().Format(formatted)
@@ -29,7 +34,12 @@ func NextDateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Fprint(w, result)
+	_, err = fmt.Fprint(w, result)
+	if err != nil {
+		http.Error(w, "failed to write response", http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {

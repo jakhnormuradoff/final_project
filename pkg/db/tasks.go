@@ -20,6 +20,11 @@ func Tasks(limit int) ([]Task, error) {
 		task.ID = strconv.FormatInt(idInt, 10)
 		tasks = append(tasks, task)
 	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	if tasks == nil {
 		tasks = []Task{}
 	}

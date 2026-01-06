@@ -9,7 +9,7 @@ import (
 )
 
 func StartServer(webDir string, port string) error {
-	fmt.Println("Запускаем сервеsр")
+	fmt.Println("Запускаем сервер на порту", port)
 	api.Init()
 	http.Handle("/", http.FileServer(http.Dir(webDir)))
 	err := http.ListenAndServe(":"+port, nil)

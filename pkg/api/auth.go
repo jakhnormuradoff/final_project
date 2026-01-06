@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -11,11 +10,8 @@ import (
 func auth(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		// смотрим наличие пароля
-		pass := os.Getenv("TODO_PASSWORD")
-		if len(pass) > 0 {
-			var jwtStr string // JWT-токен из куки
-			// получаем куку
+		if appConfig.Password != "" {
+			var jwtStr string
 			cookie, err := r.Cookie("token")
 			if err == nil {
 				jwtStr = cookie.Value
@@ -29,13 +25,12 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 
 			claims := jwt.MapClaims{}
 
-			token, err := jwt.ParseWithClaims(jwtStr, claims, func(t *jwt.Token) (interface{}, error) {
-				// проверяем алгоритм подписи
+			token, err := jwt.ParseWithClaims(jwtStr, &claims, func(t *jwt.Token) (interface{}, error) {
 				if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, jwt.ErrSignatureInvalid
 
 				}
-				return []byte(os.Getenv("TODO_PASSWORD")), nil
+				return []byte(appConfig.Password), nil
 
 			})
 
